@@ -7,7 +7,9 @@ import kz.mmparts.backend.Repository.PartRepository;
 import kz.mmparts.backend.Repository.PartSpecification;
 import kz.mmparts.backend.Services.PartService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,13 +41,19 @@ public class PartController {
             Pageable pageable
     ){
 
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
         Specification<Part> spec = Specification.where((root, query, cb) -> null);
 
         if (brand != null) spec = spec.and(PartSpecification.hasBrand(brand));
         if (model != null) spec = spec.and(PartSpecification.hasModel(model));
         if (generation != null) spec = spec.and(PartSpecification.hasGeneration(generation));
 
-        return ResponseEntity.ok(partRepository.findAll(spec, pageable));
+        return ResponseEntity.ok(partRepository.findAll(spec, sortedPageable));
     }
 }
 
