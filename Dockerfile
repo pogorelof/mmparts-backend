@@ -1,26 +1,29 @@
-# Этап 1: Сборка (Build)
-# Используем Gradle 8.12, так как он поддерживает Spring Boot 4.0.0
-FROM gradle:8.12-jdk17 AS build
+# Этап 1: Сборка
+FROM eclipse-temurin:17-jdk-alpine AS build
 WORKDIR /app
 
-# Копируем только файлы сборки для кэширования зависимостей
+# Копируем файлы воркера (gradlew) и настройки
+COPY gradlew .
+COPY gradle ./gradle
 COPY build.gradle settings.gradle ./
-# Копируем исходный код
+
+# Даем права на выполнение скрипта (важно для Linux/Render)
+RUN chmod +x gradlew
+
+# Скачиваем зависимости (кешируем этот слой)
+RUN ./gradlew dependencies --no-daemon
+
+# Копируем исходники и собираем
 COPY src ./src
+RUN ./gradlew clean bootJar -x test --no-daemon
 
-# Сборка проекта. Флаг --no-daemon экономит память в контейнере
-RUN gradle clean bootJar -x test --no-daemon
-
-# Этап 2: Запуск (Runtime)
+# Этап 2: Запуск
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-# Копируем JAR. Используем маску, чтобы не зависеть от версии в названии
 COPY --from=build /app/build/libs/*-SNAPSHOT.jar app.jar
 
-# Порт для Render
 EXPOSE 8080
 
-# Настройки JVM для стабильной работы на бесплатном тарифе (512MB RAM)
-# -Xmx320m оставляет запас для метаспейса и стеков потоков
-ENTRYPOINT ["java", "-Xmx320m", "-Xss512k", "-XX:MaxMetaspaceSize=128m", "-jar", "app.jar"]
+# Лимиты памяти для Render (Free Tier)
+ENTRYPOINT ["java", "-Xmx320m", "-Xss512k", "-jar", "app.jar"]
