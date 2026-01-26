@@ -117,3 +117,8 @@
   "totalPages": 1
 }
 ````
+
+# 3. Получение списка брендов, моделий и поколений
+1. Бренды - ```` GET http://<адрес_сервера>/generations/all/brands````
+2. Модели - ```` GET http://<адрес_сервера>/generations/all/models/{brand}````
+3. Поколения - ```` GET http://<адрес_сервера>/generations/all/generations/{brand}/{model}````

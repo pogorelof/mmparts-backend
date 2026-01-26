@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/generations")
+@RequestMapping("/api/generations")
 @AllArgsConstructor
 public class GenerationController {
 

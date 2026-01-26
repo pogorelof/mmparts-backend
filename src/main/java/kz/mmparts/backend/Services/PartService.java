@@ -27,14 +27,23 @@ public class PartService {
     private final PartRepository partRepository;
     private final GenerationRepository generationRepository;
 
+    public Part findById(Long id){
+        return partRepository.findById(id).orElseGet(()->null);
+    }
+
     @Transactional
-    public Part createPart(PartCreate partDto, List<MultipartFile> images) throws IOException{
+    public Part createPart(PartCreate partDto, List<MultipartFile> images){
         Part part = new Part();
         part.setTitle(partDto.getTitle());
         part.setDescription(partDto.getDescription());
         part.setPrice(partDto.getPrice());
 
-        List<PartImage> partImages = saveImages(images);
+        List<PartImage> partImages = null;
+        try {
+            partImages = saveImages(images);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         partImages.forEach(i -> i.setPart(part));
         part.setImages(partImages);
 

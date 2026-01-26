@@ -19,16 +19,21 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/parts")
+@RequestMapping("/api/parts")
 @AllArgsConstructor
 public class PartController {
 
     private PartService partService;
     private PartRepository partRepository;
 
+    @GetMapping("/{id}")
+    public Part getById(@PathVariable Long id){
+        return partService.findById(id);
+    }
+
     @PostMapping("/create")
     public Part createPart(@RequestPart("part") PartCreate partCreate,
-                           @RequestPart("images") List<MultipartFile> images) throws IOException {
+                           @RequestPart("images") List<MultipartFile> images) {
         return partService.createPart(partCreate, images);
     }
 

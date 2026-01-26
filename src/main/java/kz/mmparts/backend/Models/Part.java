@@ -29,6 +29,7 @@ public class Part {
     private Long id;
 
     private String title;
+    @Column(length = 5000)
     private String description;
     private Double price = 0.0;
     private Boolean inStock = true;
