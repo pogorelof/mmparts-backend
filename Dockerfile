@@ -1,18 +1,24 @@
 # Этап 1: Сборка
-# Обновляем версию Gradle до 8.x (например, 8.5)
-FROM gradle:8.5-jdk17 AS build
+# Используем самую свежую версию Gradle (напр. 8.14+ или последнюю доступную)
+FROM gradle:jdk21 AS build
 WORKDIR /app
+
+# Копируем файлы проекта
 COPY build.gradle settings.gradle ./
 COPY src ./src
-# Используем встроенный gradle или установленный в образе
+
+# Собираем JAR
 RUN gradle clean bootJar -x test
 
 # Этап 2: Запуск
-FROM eclipse-temurin:17-jre-alpine
+# Spring Boot 4 требует Java 17+, но лучше всего работает на Java 21
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
+
+# Копируем результат сборки
 COPY --from=build /app/build/libs/*.jar app.jar
 
 EXPOSE 8080
 
-# Ограничение памяти для Free Tier (512MB)
-ENTRYPOINT ["java", "-Xmx300m", "-Xss512k", "-XX:MaxMetaspaceSize=128m", "-jar", "app.jar"]
+# Оптимизация памяти для бесплатного тарифа (512MB RAM)
+ENTRYPOINT ["java", "-Xmx350m", "-Xss512k", "-XX:MaxMetaspaceSize=128m", "-jar", "app.jar"]
