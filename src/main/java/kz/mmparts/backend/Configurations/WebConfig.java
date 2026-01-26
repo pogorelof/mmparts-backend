@@ -15,11 +15,12 @@ public class WebConfig implements WebMvcConfigurer {
                 .addResourceLocations("file:uploads/");
     }
 
-//    @Override
-//    public void addCorsMappings(CorsRegistry registry) {
-//        registry.addMapping("/**")
-//                .allowedOrigins("*")
-//                .allowedMethods("GET", "POST", "PUT", "DELETE")
-//                .allowedHeaders("*");
-//    }
+    // This cors work for paths, that ignored SecurityFilterChain in SecurityConfig
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOrigins("*")
+                .allowedMethods("GET", "POST", "PUT", "DELETE")
+                .allowedHeaders("*");
+    }
 }
