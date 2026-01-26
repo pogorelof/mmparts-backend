@@ -31,12 +31,6 @@ public class PartController {
         return partService.findById(id);
     }
 
-    @PostMapping("/create")
-    public Part createPart(@RequestPart("part") PartCreate partCreate,
-                           @RequestPart("images") List<MultipartFile> images) {
-        return partService.createPart(partCreate, images);
-    }
-
     @GetMapping("/")
     public ResponseEntity<?> getAllParts(
             @RequestParam(required = false) String brand,
