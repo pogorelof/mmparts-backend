@@ -6,6 +6,7 @@ import kz.mmparts.backend.Repository.PartRepository;
 import kz.mmparts.backend.Services.PartService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -33,5 +34,13 @@ public class PartAdminController {
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Part not found")
         );
         partRepository.delete(part);
+    }
+
+    @PostMapping("/toggle/{id}")
+    public void toggleInStock(@PathVariable Long id){
+        Part part = partRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Part not found")
+        );
+        partService.toggleInStock(part);
     }
 }

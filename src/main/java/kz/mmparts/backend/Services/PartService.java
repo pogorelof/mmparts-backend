@@ -87,5 +87,10 @@ public class PartService {
 
         return savedImages;
     }
+
+    public void toggleInStock(Part part){
+        part.setInStock(!part.getInStock());
+        partRepository.save(part);
+    }
 }
 
