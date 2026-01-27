@@ -36,6 +36,7 @@ public class PartController {
             @RequestParam(required = false) String brand,
             @RequestParam(required = false) String model,
             @RequestParam(required = false) String generation,
+            @RequestParam(required = false) String search,
 
             Pageable pageable
     ){
@@ -51,6 +52,10 @@ public class PartController {
         if (brand != null) spec = spec.and(PartSpecification.hasBrand(brand));
         if (model != null) spec = spec.and(PartSpecification.hasModel(model));
         if (generation != null) spec = spec.and(PartSpecification.hasGeneration(generation));
+
+        if (search != null && !search.trim().isEmpty()){
+            spec = spec.and(PartSpecification.searchByKeyword(search));
+        }
 
         return ResponseEntity.ok(partRepository.findAll(spec, sortedPageable));
     }

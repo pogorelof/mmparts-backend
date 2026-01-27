@@ -27,4 +27,14 @@ public class PartSpecification {
             return criteriaBuilder.equal(join.get("generation"), generation);
         };
     }
+
+    public static Specification<Part> searchByKeyword(String search) {
+        return (root, query, criteriaBuilder) -> {
+            String lk = "%" + search.toLowerCase() + "%";
+            return criteriaBuilder.or(
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), lk),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("description")), lk)
+            );
+        };
+    }
 }
