@@ -4,6 +4,7 @@ package kz.mmparts.backend.Services;
 import jakarta.transaction.Transactional;
 import kz.mmparts.backend.DTO.GenerationDto;
 import kz.mmparts.backend.DTO.PartCreate;
+import kz.mmparts.backend.DTO.PartUpdate;
 import kz.mmparts.backend.Models.Generation;
 import kz.mmparts.backend.Models.Part;
 import kz.mmparts.backend.Models.PartImage;
@@ -38,6 +39,38 @@ public class PartService {
 
     public Part findById(Long id){
         return partRepository.findById(id).orElseGet(()->null);
+    }
+
+    @Transactional
+    public Part updatePart(Long id, PartUpdate partUpdate, List<MultipartFile> newImages){
+        Part part = partRepository.findById(id).orElseThrow(
+                () -> new RuntimeException("Part not found")
+        );
+
+        part.setTitle(partUpdate.getTitle());
+        part.setDescription(partUpdate.getDescription());
+        part.setPrice(partUpdate.getPrice());
+
+        part.getGenerations().clear();
+        for (GenerationDto generationDto : partUpdate.getGenerations()){
+            Generation generation = findOrCreateGeneration(generationDto);
+            part.getGenerations().add(generation);
+        }
+
+        List<Long> keepIds = partUpdate.getOldImagesIds() != null ? partUpdate.getOldImagesIds() : new ArrayList<>();
+        part.getImages().removeIf(image -> !keepIds.contains(image.getId()));
+
+        if (newImages != null && !newImages.isEmpty()){
+            try {
+                List<PartImage> partImages = saveImages(newImages);
+                partImages.forEach(i -> i.setPart(part));
+                part.getImages().addAll(partImages);
+            } catch (IOException e){
+                throw new RuntimeException("Error uploading new images: ", e);
+            }
+        }
+
+        return partRepository.save(part);
     }
 
     @Transactional

@@ -1,6 +1,7 @@
 package kz.mmparts.backend.Controllers.Admin;
 
 import kz.mmparts.backend.DTO.PartCreate;
+import kz.mmparts.backend.DTO.PartUpdate;
 import kz.mmparts.backend.Models.Part;
 import kz.mmparts.backend.Repository.PartRepository;
 import kz.mmparts.backend.Services.PartService;
@@ -25,6 +26,16 @@ public class PartAdminController {
     public Part createPart(@RequestPart("part") PartCreate partCreate,
                            @RequestPart("images") List<MultipartFile> images) {
         return partService.createPart(partCreate, images);
+    }
+
+    @PutMapping("/update/{id}")
+    public Part updatePart(
+            @RequestPart("part")PartUpdate partUpdate,
+            @RequestPart(value = "images", required = false) List<MultipartFile> newImages,
+            @PathVariable Long id
+            ){
+        Part updatedPart = partService.updatePart(id, partUpdate, newImages);
+        return updatedPart;
     }
 
     @DeleteMapping("/delete/{id}")
