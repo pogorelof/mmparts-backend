@@ -47,7 +47,7 @@ public class PartController {
                 Sort.by(Sort.Direction.DESC, "createdAt")
         );
 
-        Specification<Part> spec = Specification.where((root, query, cb) -> null);
+        Specification<Part> spec = Specification.where((root, query, cb) -> cb.equal(root.get("inStock"), true));
 
         if (brand != null) spec = spec.and(PartSpecification.hasBrand(brand));
         if (model != null) spec = spec.and(PartSpecification.hasModel(model));
