@@ -10,8 +10,12 @@ import kz.mmparts.backend.Models.PartImage;
 import kz.mmparts.backend.Repository.GenerationRepository;
 import kz.mmparts.backend.Repository.PartRepository;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,11 +23,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class PartService {
 
+    @Value("${app.upload-media-type}")
+    private String uploadMediaType;
+
+    private final Cloudinary cloudinary;
     private final PartRepository partRepository;
     private final GenerationRepository generationRepository;
 
@@ -70,17 +79,23 @@ public class PartService {
     }
 
     public List<PartImage> saveImages(List<MultipartFile> images) throws IOException {
+
         String uploadDir = "uploads/";
         List<PartImage> savedImages = new ArrayList<>();
 
         for (MultipartFile image : images){
             String filename = System.currentTimeMillis() + "_" + image.getOriginalFilename();
-            Path filePath = Paths.get(uploadDir + filename);
-            Files.createDirectories(filePath.getParent());
-            Files.write(filePath, image.getBytes());
-
             PartImage partImage = new PartImage();
-            partImage.setUrl("/uploads/" + filename);
+
+            if (uploadMediaType.equals("local")){
+                Path filePath = Paths.get(uploadDir + filename);
+                Files.createDirectories(filePath.getParent());
+                Files.write(filePath, image.getBytes());
+                partImage.setUrl("/uploads/" + filename);
+            }else if(uploadMediaType.equals("cloudinary")){
+                Map uploadResult = cloudinary.uploader().upload(image.getBytes(), ObjectUtils.emptyMap());
+                partImage.setUrl(uploadResult.get("url").toString());
+            }
 
             savedImages.add(partImage);
         }
