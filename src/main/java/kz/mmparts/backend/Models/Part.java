@@ -50,4 +50,15 @@ public class Part {
     @OneToMany(mappedBy = "part", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<PartImage> images = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "parts")
+    @JsonBackReference
+    private List<Order> orders = new ArrayList<>();
+
+    @PreRemove
+    private void removePartsFromOrders(){
+        for (Order order : orders){
+            order.getParts().remove(this);
+        }
+    }
 }
